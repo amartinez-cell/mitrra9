@@ -18,14 +18,18 @@ const UNITS_BY_CHANNEL = {
 }
 
 const DISTRIBUTORS_APR = [
-  { distributor: 'SouthCo Beverage Group',       revenue: 148000, units: 12300, fill_rate: 0.97, order_frequency: 4 },
-  { distributor: 'Rocky Mountain Distributing',  revenue: 62000,  units: 5100,  fill_rate: 0.88, order_frequency: 2 },
-  { distributor: 'Atlantic Trade Partners',      revenue: 38000,  units: 3100,  fill_rate: 0.91, order_frequency: 2 },
-  { distributor: 'Humboldt Beverage',            revenue: 22000,  units: 1800,  fill_rate: 0.74, order_frequency: 1 },
-  { distributor: 'Zuma Distribution',            revenue: 95000,  units: 7900,  fill_rate: 0.89, order_frequency: 3 },
-  { distributor: 'Sacani Distributors',          revenue: 18000,  units: 1500,  fill_rate: 0.71, order_frequency: 1 },
-  { distributor: 'Beauchamp Beverage',           revenue: 15000,  units: 1200,  fill_rate: 0.66, order_frequency: 1 },
-  { distributor: 'Guardian Beverage',            revenue: 22000,  units: 1800,  fill_rate: 0.72, order_frequency: 1 },
+  { distributor: 'JJT Alternatives, LLC.',                              revenue: 176000, units: 14600, fill_rate: 0.96, order_frequency: 4 },
+  { distributor: 'Briggs Distributing',                                  revenue: 71800,  units: 5950,  fill_rate: 0.93, order_frequency: 3 },
+  { distributor: '4 Stories LLC',                                        revenue: 77200,  units: 6400,  fill_rate: 0.92, order_frequency: 3 },
+  { distributor: 'Carroll Distributing Company (FL)',                    revenue: 75300,  units: 6240,  fill_rate: 0.94, order_frequency: 3 },
+  { distributor: 'Fabiano Brothers- Bay City',                           revenue: 52300,  units: 4350,  fill_rate: 0.89, order_frequency: 3 },
+  { distributor: 'Champion Brands',                                      revenue: 38300,  units: 3180,  fill_rate: 0.88, order_frequency: 2 },
+  { distributor: 'Southern Horizon Logistics LLC - Charleston Branch',   revenue: 41600,  units: 3450,  fill_rate: 0.91, order_frequency: 2 },
+  { distributor: 'Guardian Distributors',                                revenue: 25400,  units: 2100,  fill_rate: 0.74, order_frequency: 2 },
+  { distributor: 'Zuma and Sons Distributor Corp',                       revenue: 29800,  units: 2470,  fill_rate: 0.86, order_frequency: 2 },
+  { distributor: 'SF Naturals',                                          revenue: 22700,  units: 1880,  fill_rate: 0.78, order_frequency: 1 },
+  { distributor: 'Jerome Distributing- Bismarck',                        revenue: 20900,  units: 1730,  fill_rate: 0.81, order_frequency: 1 },
+  { distributor: 'Saccani Distributing',                                 revenue: 23800,  units: 1970,  fill_rate: 0.72, order_frequency: 1 },
 ]
 
 const PRODUCT_APR = [

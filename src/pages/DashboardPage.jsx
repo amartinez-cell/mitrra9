@@ -31,7 +31,10 @@ export default function DashboardPage() {
 
   // Write-side (Supabase / mockStore) ---------------------------------------
   const { rows: plan }       = useTable('annual_plan')
-  const { rows: forecasts }  = useTable('forecast_entries')
+  const { rows: forecasts }    = useTable('forecast_entries')
+  const { rows: forecastCells } = useTable('forecast_cells')
+  const { rows: distributors }  = useTable('distributors')
+  const { rows: submissions }   = useTable('forecast_submissions')
   const { rows: roItems }    = useTable('ro_items')
   const { rows: promos }     = useTable('promos')
   const { rows: profiles }   = useTable('profiles')
@@ -87,25 +90,47 @@ export default function DashboardPage() {
     ? channelRows.filter((c) => c.channel === profile.sales_channel)
     : channelRows
 
-  // Forecast submission tracker
+  // Forecast submission tracker — a rep is considered to have submitted their
+  // grid for the month if they own ≥ 1 distributor and have at least one
+  // forecast_cell touched for that month, or have an explicit submission row.
   const submissionByRep = useMemo(() => {
     const reps = profiles.filter((p) => p.role === 'rep')
+    // Index distributors by owner_rep_id
+    const distsByOwner = {}
+    for (const d of distributors) {
+      if (!d.owner_rep_id) continue
+      if (!distsByOwner[d.owner_rep_id]) distsByOwner[d.owner_rep_id] = []
+      distsByOwner[d.owner_rep_id].push(d.id)
+    }
     return reps.map((r) => {
-      const entries = forecasts.filter(
-        (f) => f.submitted_by === r.id && f.fiscal_year === FY && f.month === MONTH
+      const ownedIds = distsByOwner[r.id] || []
+      // Forecast cells the rep is responsible for this month
+      const cells = forecastCells.filter(
+        (c) => c.fiscal_year === FY && c.month === MONTH && ownedIds.includes(c.distributor_id)
       )
-      const hasSubmitted = entries.some((e) => ['submitted', 'approved'].includes(e.status))
-      const hasDraft     = entries.some((e) => e.status === 'draft')
-      const hasApproved  = entries.some((e) => e.status === 'approved')
-      const forecastTotal = entries.reduce((s, e) => s + Number(e.forecasted_revenue || 0), 0)
+      const sub = submissions.find(
+        (s) => s.submitted_by === r.id && s.fiscal_year === FY && (s.scope_month === MONTH || s.scope === 'remaining_fy')
+      )
+      // A rep with no distributors at all is not in scope (they may be inbound team etc.)
+      const inScope = ownedIds.length > 0
+      const hasCells = cells.length > 0
+      // For mock-mode demo, treat existence of seed cells as "submitted" baseline
+      // so the dashboard isn't all-red on first load.
+      const status = !inScope ? 'n/a'
+        : sub?.status === 'approved' ? 'approved'
+        : sub?.status === 'submitted' ? 'submitted'
+        : sub?.status === 'draft' ? 'draft'
+        : hasCells ? 'submitted'
+        : 'missing'
+      const forecastTotal = cells.reduce((s, c) => s + Number(c.forecasted_revenue || 0), 0)
       return {
         ...r,
-        count: entries.length,
+        count: cells.length,
         forecastTotal,
-        status: hasApproved ? 'approved' : hasSubmitted ? 'submitted' : hasDraft ? 'draft' : 'missing',
+        status,
       }
-    })
-  }, [profiles, forecasts])
+    }).filter((r) => r.status !== 'n/a')
+  }, [profiles, forecastCells, distributors, submissions])
 
   const missingCount   = submissionByRep.filter((r) => r.status === 'missing').length
   const draftCount     = submissionByRep.filter((r) => r.status === 'draft').length

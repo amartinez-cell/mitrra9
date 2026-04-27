@@ -43,11 +43,17 @@ export default function RiskOppsPage() {
   const totals = useMemo(() => {
     const risks = filtered.filter((r) => r.item_type === 'risk')
     const opps = filtered.filter((r) => r.item_type === 'opportunity')
+    const goGets = opps.filter((r) => r.classification === 'incremental')
     const riskEV = risks.reduce((s, r) => s + Number(r.expected_value || 0), 0)
     const oppEV  = opps.reduce((s, r) => s + Number(r.expected_value || 0), 0)
+    const goGetEV = goGets.reduce((s, r) => s + Number(r.expected_value || 0), 0)
     const baseRiskEV = risks.filter((r) => r.classification === 'base').reduce((s, r) => s + Number(r.expected_value || 0), 0)
     const incRiskEV  = risks.filter((r) => r.classification === 'incremental').reduce((s, r) => s + Number(r.expected_value || 0), 0)
-    return { riskEV, oppEV, net: riskEV + oppEV, baseRiskEV, incRiskEV, riskCount: risks.length, oppCount: opps.length }
+    return {
+      riskEV, oppEV, net: riskEV + oppEV, baseRiskEV, incRiskEV,
+      riskCount: risks.length, oppCount: opps.length,
+      goGetCount: goGets.length, goGetEV,
+    }
   }, [filtered])
 
   async function handleDelete(r) {
@@ -61,6 +67,16 @@ export default function RiskOppsPage() {
 
   return (
     <div className="space-y-4">
+      {/* Cascade explainer */}
+      {totals.goGetCount > 0 && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-xs text-emerald-900 flex items-center gap-2">
+          <ArrowUpRight size={14} className="text-emerald-700 flex-shrink-0" />
+          <span>
+            <span className="font-semibold">{totals.goGetCount} incremental opportunit{totals.goGetCount === 1 ? 'y' : 'ies'}</span> ({fmtCompactCurrency(totals.goGetEV)} total EV) {totals.goGetCount === 1 ? 'is' : 'are'} appearing as Go Get rows in the Forecast Grid. Promote to Base when committed.
+          </span>
+        </div>
+      )}
+
       {/* KPI ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
         <Card className="!p-4">
@@ -170,6 +186,11 @@ export default function RiskOppsPage() {
                       {r.classification && (
                         <Tag color={r.classification === 'base' ? 'slate' : 'amber'}>
                           {r.classification}
+                        </Tag>
+                      )}
+                      {r.item_type === 'opportunity' && r.classification === 'incremental' && (
+                        <Tag color="green" title="Auto-synthesized as a Go Get row in the Forecast Grid">
+                          ↗ On Grid · Go Get
                         </Tag>
                       )}
                       <Tag color={statusColor(r.status)}>{r.status.replace('_', ' ')}</Tag>

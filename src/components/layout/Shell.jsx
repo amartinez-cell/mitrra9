@@ -1,7 +1,7 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, LineChart, AlertTriangle, Lightbulb, CalendarDays,
-  Calculator, Building2, LogOut, Bell, ChevronDown,
+  Calculator, Building2, LogOut, Bell, ChevronDown, Target,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useState } from 'react'
@@ -16,6 +16,7 @@ const NAV = [
   { to: '/promos',        label: 'Promo Calendar',    icon: CalendarDays,    roles: ['manager', 'rep', 'viewer'] },
   { to: '/miss',          label: 'Miss Calculator',   icon: Calculator,      roles: ['manager', 'viewer'] },
   { to: '/distributors',  label: 'Distributors',      icon: Building2,       roles: ['manager', 'rep', 'viewer'] },
+  { to: '/targets',       label: 'Target Setting',    icon: Target,          roles: ['manager'] },
 ]
 
 export default function Shell({ children }) {
@@ -156,6 +157,7 @@ function pageTitle(path) {
     '/promos': 'Promotional Calendar',
     '/miss': 'Revenue Miss Calculator',
     '/distributors': 'Distributor Scorecard',
+    '/targets': 'Target Setting',
   }
   return map[path] || 'Mitra-9'
 }
@@ -169,6 +171,7 @@ function pageSubtitle(path) {
     '/promos': 'Plan, sequence, and link promos to forecast impact',
     '/miss': 'True-cost modeling for delayed and unshipped orders',
     '/distributors': 'Partner-level performance vs target',
+    '/targets': 'Set distributor and rep revenue plans for the fiscal year',
   }
   return map[path] || ''
 }

@@ -4,7 +4,7 @@ import {
 } from 'recharts'
 import {
   Plus, Send, Trash2, Edit3, Check, X as XIcon, ChevronRight, ChevronDown,
-  FileText, GitBranch, BarChart3,
+  FileText, GitBranch, BarChart3, Grid3x3,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useTable, insertRow, updateRow, deleteRow } from '../hooks/useTable'
@@ -14,6 +14,7 @@ import { Card, Tag, Modal, EmptyState } from '../components/ui/Primitives'
 import {
   fmtCompactCurrency, fmtPct, fmtNumber, classNames, monthName, MONTHS,
 } from '../lib/format'
+import ForecastGrid from './forecast-grid/ForecastGrid'
 
 const FY = 2026
 const DEFAULT_MONTH = 4
@@ -22,27 +23,31 @@ const PRODUCT_CATEGORIES = ['Shots', 'Seltzers', 'Sticks', 'Kegs']
 
 export default function PlanForecastPage() {
   const { profile, isManager, isRep, canWrite } = useAuth()
-  const [tab, setTab] = useState('forecast')
+  const [tab, setTab] = useState('grid')
   const [month, setMonth] = useState(DEFAULT_MONTH)
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex gap-1 bg-white border border-slate-200 rounded-lg p-1">
-          <TabButton active={tab === 'forecast'}  onClick={() => setTab('forecast')}  icon={FileText}>Forecast Entry</TabButton>
+          <TabButton active={tab === 'grid'}      onClick={() => setTab('grid')}      icon={Grid3x3}>Reforecast Grid</TabButton>
           <TabButton active={tab === 'variance'}  onClick={() => setTab('variance')}  icon={BarChart3}>Channel Variance</TabButton>
           <TabButton active={tab === 'bridge'}    onClick={() => setTab('bridge')}    icon={GitBranch}>Plan-to-Actuals Bridge</TabButton>
+          <TabButton active={tab === 'forecast'}  onClick={() => setTab('forecast')}  icon={FileText}>Legacy Entry</TabButton>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-slate-600">Period</label>
-          <select className="input !w-auto" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
-            {MONTHS.map((m, i) => (
-              <option key={i} value={i + 1}>{m} {FY}</option>
-            ))}
-          </select>
-        </div>
+        {tab !== 'grid' && (
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-slate-600">Period</label>
+            <select className="input !w-auto" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+              {MONTHS.map((m, i) => (
+                <option key={i} value={i + 1}>{m} {FY}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
+      {tab === 'grid'     && <ForecastGrid fiscalYear={FY} />}
       {tab === 'forecast' && <ForecastEntryTab month={month} profile={profile} isManager={isManager} isRep={isRep} canWrite={canWrite} />}
       {tab === 'variance' && <VarianceTab     month={month} />}
       {tab === 'bridge'   && <BridgeTab       month={month} isManager={isManager} profile={profile} />}

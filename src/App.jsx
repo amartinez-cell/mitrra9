@@ -9,6 +9,7 @@ import InitiativesPage from './pages/InitiativesPage'
 import PromosPage from './pages/PromosPage'
 import MissCalculatorPage from './pages/MissCalculatorPage'
 import DistributorsPage from './pages/DistributorsPage'
+import TargetsPage from './pages/targets/TargetsPage'
 
 function RequireAuth({ children }) {
   const { profile, loading } = useAuth()
@@ -50,6 +51,16 @@ export default function App() {
           }
         />
         <Route path="/distributors" element={<RequireAuth><DistributorsPage /></RequireAuth>} />
+        <Route
+          path="/targets"
+          element={
+            <RequireAuth>
+              <RequireRole roles={['manager']}>
+                <TargetsPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>

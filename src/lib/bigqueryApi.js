@@ -12,6 +12,9 @@ import { MOCK_ACTUALS } from '../data/mockActuals'
 const BASE = import.meta.env.VITE_BIGQUERY_API_URL || ''
 
 async function safeFetch(path, params = {}) {
+  // No API base → skip the fetch entirely and let the caller fall back to mock.
+  if (!BASE) return null
+
   const qs = new URLSearchParams(params).toString()
   const url = `${BASE}${path}${qs ? `?${qs}` : ''}`
   try {

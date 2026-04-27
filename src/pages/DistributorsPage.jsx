@@ -14,15 +14,24 @@ export default function DistributorsPage() {
   const { profile, isManager } = useAuth()
   const [month, setMonth] = useState(4)
   const { rows: targets }      = useTable('distributor_targets')
+  const { rows: distributors } = useTable('distributors')
+  const { rows: regions }      = useTable('regions')
   const { rows: roItems }      = useTable('ro_items')
   const { data: actualsData }  = useAsync(() => fetchByDistributor(FY, month), [month])
 
   const rows = useMemo(() => {
     if (!actualsData) return []
+    const distById     = new Map(distributors.map((d) => [d.id, d]))
+    const regionById   = new Map(regions.map((r) => [r.id, r.name]))
     const targetByName = {}
     for (const t of targets) {
       if (t.fiscal_year === FY && t.month === month) {
-        targetByName[t.distributor_name] = { target: Number(t.target_revenue), region: t.sales_region }
+        const d = distById.get(t.distributor_id)
+        if (!d) continue
+        targetByName[d.name] = {
+          target: Number(t.target_revenue),
+          region: regionById.get(d.region_id) || d.channel,
+        }
       }
     }
     const actuals = actualsData.rows || []
@@ -46,7 +55,7 @@ export default function DistributorsPage() {
              pctPlan >= 0.80 ? 'amber' : 'red',
       }
     }).sort((a, b) => (b.target || 0) - (a.target || 0))
-  }, [actualsData, targets, month])
+  }, [actualsData, targets, distributors, regions, month])
 
   // Bucket into over / on / under
   const overperformers  = rows.filter((r) => r.pctPlan != null && r.pctPlan >= 1)

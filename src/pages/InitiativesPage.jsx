@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import {
   Plus, Edit3, Trash2, Lock, ChevronRight, Sliders, MessageCircle,
-  Link2, Award, ArrowLeft, ArrowRight,
+  Link2, Award, ArrowLeft, ArrowRight, ArrowUpRight, Check,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useTable, insertRow, updateRow, deleteRow } from '../hooks/useTable'
@@ -64,6 +64,43 @@ export default function InitiativesPage() {
   async function handleDelete(i) {
     if (!confirm(`Delete initiative "${i.name}"?`)) return
     await deleteRow('initiatives', i.id, profile)
+  }
+
+  /**
+   * Convert an Initiative to an R&O Opportunity. Creates a new ro_items row
+   * (classification = 'incremental', item_type = 'opportunity') and links the
+   * initiative back via linked_ro_id. The new R&O will then auto-appear as a
+   * "Go Get" row in the Forecast Grid for its channel.
+   */
+  async function convertToRO(i) {
+    if (i.linked_ro_id) {
+      const existing = roItems.find((r) => r.id === i.linked_ro_id)
+      if (existing) {
+        alert(`This initiative already has a linked R&O: "${existing.description}".`)
+        return
+      }
+    }
+    const mid = Number(i.revenue_potential || 0)
+    const confidenceToProb = { high: 0.8, medium: 0.5, low: 0.25 }
+    const probability = confidenceToProb[i.confidence_level] ?? 0.5
+    if (!confirm(`Create an R&O Opportunity for "${i.name}"?\n\nIt will appear as a Go Get row on the Forecast Grid for ${i.sales_channel || 'all channels'}.`)) return
+
+    const ro = await insertRow('ro_items', {
+      item_type: 'opportunity',
+      classification: 'incremental',
+      description: i.name,
+      sales_channel: i.sales_channel || null,
+      owner: i.owner || null,
+      owner_name: i.owner_name || null,
+      impact_low: Math.round(mid * 0.6),
+      impact_mid: mid,
+      impact_high: Math.round(mid * 1.4),
+      probability,
+      status: 'in_progress',
+      next_steps: i.dependencies || null,
+      due_date: null,
+    }, profile)
+    await updateRow('initiatives', i.id, { linked_ro_id: ro.id }, profile)
   }
 
   return (
@@ -154,6 +191,19 @@ export default function InitiativesPage() {
                           <button onClick={() => setCommentsOn(i)} className="p-1 rounded hover:bg-slate-100" title="Comments">
                             <MessageCircle size={12} />
                           </button>
+                          {canWrite && (
+                            <button
+                              onClick={() => convertToRO(i)}
+                              className={classNames(
+                                'p-1 rounded hover:bg-slate-100',
+                                i.linked_ro_id ? 'text-emerald-600' : ''
+                              )}
+                              title={i.linked_ro_id ? 'Linked to R&O — click for details' : 'Convert to R&O Opportunity (creates Go Get on grid)'}
+                              disabled={!!i.linked_ro_id}
+                            >
+                              {i.linked_ro_id ? <Check size={12} /> : <ArrowUpRight size={12} />}
+                            </button>
+                          )}
                           {(isManager || i.created_by === profile.id) && (
                             <button onClick={() => setEditing(i)} className="p-1 rounded hover:bg-slate-100" title="Edit">
                               <Edit3 size={12} />
