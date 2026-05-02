@@ -11,7 +11,11 @@ import {
   SEED_PROFILES, SEED_REGIONS, SEED_TEAMS,
   SEED_DISTRIBUTORS, SEED_DISTRIBUTOR_TARGETS, SEED_YEARLY_TARGETS, SEED_FORECAST_CELLS,
   SEED_REP_TARGETS,
+  SEED_DIRECTORS, DIRECTOR_CHANNEL_OWNERSHIP,
 } from './seedMaster'
+import {
+  SEED_SKUS, SEED_PRICING_TIERS, SEED_POS_MATERIALS,
+} from './seedPromo'
 
 // --- helpers ---
 function uid() {
@@ -31,6 +35,24 @@ function daysFromNow(n) {
 // Quick name → id lookup for hardcoded seed references below
 const idOf = {}
 SEED_PROFILES.forEach((p) => { idOf[p.full_name] = p.id })
+SEED_DIRECTORS.forEach((p) => { idOf[p.full_name] = p.id })
+
+// Merge profiles + directors. Promote Evan and JR to 'director' role since
+// they own multiple channels at the leadership level.
+const ALL_PROFILES = (() => {
+  const merged = [...SEED_PROFILES]
+  // Promote existing reps/managers to directors where applicable
+  for (const p of merged) {
+    if (p.full_name === 'Evan Beard' || p.full_name === 'JR Hernandez') {
+      p.role = 'director'
+    }
+  }
+  // Append new directors
+  for (const d of SEED_DIRECTORS) {
+    if (!merged.find((p) => p.email === d.email)) merged.push(d)
+  }
+  return merged
+})()
 
 // Roll annual plan up to channel × month from the master distributor data
 function rollupAnnualPlanFromDistributors() {
@@ -62,7 +84,7 @@ function rollupAnnualPlanFromDistributors() {
 
 const seed = {
   // --- Master data (from seedMaster) ---
-  profiles: SEED_PROFILES.map((p) => ({ ...p, created_at: now() })),
+  profiles: ALL_PROFILES.map((p) => ({ ...p, created_at: now() })),
   regions: SEED_REGIONS,
   teams: SEED_TEAMS,
   distributors: SEED_DISTRIBUTORS.map((d) => {
@@ -74,6 +96,14 @@ const seed = {
   forecast_cells: SEED_FORECAST_CELLS,
   forecast_submissions: [],
   rep_targets: SEED_REP_TARGETS,
+
+  // --- Promo / pricing / SKU master ---
+  skus: SEED_SKUS,
+  pricing_tiers: SEED_PRICING_TIERS,
+  pos_materials: SEED_POS_MATERIALS,
+  promos_v2: [],                    // start fresh per business request
+  promo_sku_lines: [],
+  promo_trade_spend_lines: [],
 
   // Annual plan rolled up by channel × month, derived from the dp_targets
   // monthly cells. Used by the dashboard and other channel-level views.
@@ -156,6 +186,8 @@ const seed = {
 
 const listeners = new Set()
 const state = seed
+
+export { DIRECTOR_CHANNEL_OWNERSHIP } from './seedMaster'
 
 export const mockStore = {
   subscribe(listener) {

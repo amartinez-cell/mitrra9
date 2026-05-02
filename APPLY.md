@@ -1,91 +1,69 @@
-# Mitra-9 Sales Planning Tool — Phases A + B + C
+# Phase D — Promo Calendar, POS Materials, Pricing Admin
 
-This bundle contains the full set of changes for all three phases:
+## What's new
 
-- **Phase A** — Replace the legacy "Forecast Entry" tab with an Excel-style **Reforecast Grid** wired to real Mitra-9 master data from Book4 (41 distributors, 5 regions, 30 reps).
-- **Phase B** — New **Target Setting** page (manager-only) with two tabs: Distributor Targets and Rep Targets.
-- **Phase C** — **R&O cascade rework**: "Convert to R&O" button on Initiatives, Go Get badges on R&O Tracker, banner showing how many R&Os are flowing into the grid as Go Gets.
+1. **Promo Calendar** (`/promos`) — fully rebuilt
+   - Gantt-style timeline view, swim lanes by channel
+   - Filters: channels, Conventional regions, statuses
+   - 1mo / 3mo / 6mo view toggles, prev/next/today navigation
+   - Click any promo bar → readonly detail modal with full calc breakdown
+   - "+ Add Promo" button (manager/director only) opens full entry form
 
-## Apply to your local clone
+2. **Promo entry form**
+   - Header: name, dates, channel (auto-defaults customer class), regions multi-select for Conventional, owner, status, mechanics note
+   - Discount: none / % off / $ off per case / billback per case
+   - SKU lines: pick product family + optional flavor + cases. Pricing tier auto-resolved from channel + case count. Tier label shown under each line.
+   - Trade spend lines: 8 categories (Coolers, Shelf Clips, Displays, Slotting, Samples, POS, Billback, Other). POS lines pull from the POS Materials catalog (qty × cost auto-calculated).
+   - Live calc panel: total cases, gross revenue, discount, gross profit, trade spend (with %), contribution profit
 
-From the root of your local `mitra9-sales-tool` clone:
+3. **POS Materials admin** (`/pos-materials`) — manager/director-only
+   - Catalog of POS items (case stackers, signs, coolers, etc.) used in promo trade spend
+   - 10 starter items pre-seeded
+   - Add/edit/delete with categories: Display, Signage, Cooler, Premium, Other
 
-```bash
-# 1. Untar the bundle into the repo, overwriting changed files
-tar xzf /path/to/mitra9-all-phases.tar.gz
+4. **Pricing & COGS admin** (`/pricing`) — manager/director-only
+   - Edit COGS per unit / per case across all 45 pricing tiers
+   - Auto-recomputes per-case COGS when per-unit COGS is changed
+   - Margin % column color-coded (green ≥40%, amber 20-40%, rose <20%)
+   - Pending edits buffered, batch save with confirm
 
-# 2. Install the new dep (xlsx for Excel export)
-npm install
+5. **Director role** added
+   - Nick Kemper (Conventional + Inbound)
+   - Evan Beard promoted to director (New Distribution + Wholesale + Chains)
+   - JR Hernandez promoted to director (eCommerce + Retail Direct)
+   - All directors get manager-equivalent write access; regional reps stay read-only on promos for v1
 
-# 3. Smoke-test
-npm run dev
+## Math chain (locked in)
+
+```
+gross revenue       = sum(line.cases × line.price_per_case)
+net revenue         = gross revenue − discount       (billback stays as trade spend, not discount)
+gross profit        = net revenue − COGS
+contribution profit = gross profit − trade spend
+trade spend %       = trade spend ÷ gross revenue
 ```
 
-Then commit and push:
+## Pricing model
 
-```bash
-git add -A
-git commit -m "Phases A+B+C: forecast grid, target setting, R&O cascade"
-git push
-```
+- **Channel → default customer class**: Conv/Inbound/NewDist/Wholesale → Distributor; Chains → Retail Direct; eCommerce → eComm Everyday
+- **Auto-tier lookup**: when user enters cases for a SKU, the right pricing bracket (e.g., Retailer 4-11 vs 12-24 vs 25-96) is picked automatically
+- 45 pricing tiers seeded across 8 product families:
+  Kratom Cans, Kava Cans, Shots Combo, Shots Kratom, Shots Kava,
+  Kratom Powder Sticks, Kava Powder Sticks, Draft Kegs
+- Plus eComm Everyday/Promoted/Deep Promo and Retail Direct levels
 
-StackBlitz will pick up the new commit automatically.
+## How to apply
 
-## What you'll see in the app
+1. Extract this tarball
+2. Upload changed files via github.dev (`.` shortcut on github.com)
+3. Commit
+4. StackBlitz auto-rebuilds
 
-### Plan & Forecast (`/plan`)
-The default tab is now **Reforecast Grid**. Login as `steve@mitra-9.com` (or any manager email) with password `mitra9demo`. You'll see:
-- 5 collapsible Conventional regions (Florida → Steve, North → Derrick, West → Lexi, East → Darrell, South → Steven V.)
-- 4 non-Conventional channel sections (Inbound, New Distribution, Wholesale, Chains)
-- Each section: partner rows + Other rolled-up row + Subtotal + MTD Landed line + Go Get rows + Subtotal + Go Gets
-- Past months (Jan-Mar) read-only grey, April amber with MTD actuals from BigQuery mock, May-Dec editable
-- Click any future cell → input. Tab/Shift+Tab/Enter/Escape work as expected.
-- "Export to Excel" button generates a `.xlsx` with two sheets matching Book3 format.
+The new tables (`skus`, `pricing_tiers`, `pos_materials`, `promos_v2`, `promo_sku_lines`, `promo_trade_spend_lines`) are seeded in mock mode automatically. For production Supabase, run migrations 003 + seed 003 in order.
 
-The legacy entry form is still accessible via the "Legacy Entry" tab.
+## What's next (deferred)
 
-### Target Setting (`/targets`) — managers only
-- **Distributor Targets** tab: full editable yearly+monthly grid, grouped by region/channel, with section subtotals + grand total of $22.3M.
-- **Rep Targets** tab: 23 reps with seed data from Book4, organized by channel, with channel-level subtotals.
-
-### Initiatives (`/initiatives`)
-Each card now has a small ↗ icon. Click it on an unlinked initiative to convert it to an R&O Opportunity — confirms first, creates the R&O with derived impact range and probability, and links them. Already-converted cards show a green checkmark instead.
-
-### Risks & Opportunities (`/risks`)
-- Top banner: "X incremental opportunities (Y total EV) are appearing as Go Get rows in the Forecast Grid"
-- Each incremental opportunity shows a green "↗ On Grid · Go Get" tag
-
-## Login emails (mock mode, password `mitra9demo` for all)
-
-**Managers:** `todd@mitra-9.com`, `albert@mitra-9.com`, `jr@mitra-9.com`
-
-**Conventional regional leads:** `steve@mitra-9.com` (FL), `derrick@mitra-9.com` (N), `lexi@mitra-9.com` (W), `darrell@mitra-9.com` (E), `steven@mitra-9.com` (S)
-
-**Channel leads:** `karli@mitra-9.com` (Inbound), `evan@mitra-9.com` (New Dist), `noah@mitra-9.com` (Wholesale), `joe@mitra-9.com` (Chains)
-
-Reps see their own region's editable cells; managers see all.
-
-## Database schema notes (when you swap mock → real Supabase)
-
-The migration `supabase/migrations/002_grid_schema.sql` adds 7 new tables:
-
-- `regions`, `teams` — org structure
-- `distributors` — canonical master list (replaces the old hardcoded distributor names)
-- `distributor_yearly_targets`, `distributor_targets` — yearly + monthly plans
-- `forecast_cells` — atomic per-cell forecast entries (replaces `forecast_entries` for grid use)
-- `forecast_submissions` — per-rep month-level approval workflow
-- `rep_targets` — total revenue target per rep per month
-
-RLS is set up: managers can write everything; reps can only edit `forecast_cells` for distributors where `owner_rep_id = auth.uid()`. Realtime is enabled on all new tables.
-
-The seed file `supabase/seed/002_seed_grid.sql` populates the same data the mock store uses.
-
-## Known gaps (deferred)
-
-- Add/remove partner rows inline within a section (just data inserts, ~30 lines)
-- Save-as-draft → submit-month workflow with the new `forecast_submissions` table
-- Paste-from-Excel for cell ranges
-- Excel import via the dp_targets template format
-- Per-cell hover tooltip with last-edit timestamp + author
-
-These are all small, scoped additions when you're ready.
+- Promo case volumes auto-cascading to Forecast Grid as Go Get rows when status moves to "approved" (the cascade infrastructure exists from Phase C; needs wiring)
+- Regional rep promo drafts → director review workflow
+- Pricing tier add/edit/delete (currently only COGS is editable; tier changes require seed edits)
+- Promo ROI rollup view (which promos contributed the most? cumulative trade spend by channel?)

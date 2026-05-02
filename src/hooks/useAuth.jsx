@@ -81,10 +81,15 @@ export function AuthProvider({ children }) {
     loading,
     signIn,
     signOut,
-    isManager: profile?.role === 'manager',
+    // Roles. Directors are leadership too — they get manager-equivalent access
+    // for most write paths. Use isManagerOnly when you need to specifically
+    // exclude directors.
+    isManager: profile?.role === 'manager' || profile?.role === 'director',
+    isManagerOnly: profile?.role === 'manager',
+    isDirector: profile?.role === 'director',
     isRep: profile?.role === 'rep',
     isViewer: profile?.role === 'viewer',
-    canWrite: profile?.role === 'manager' || profile?.role === 'rep',
+    canWrite: ['manager', 'director', 'rep'].includes(profile?.role),
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

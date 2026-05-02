@@ -437,3 +437,29 @@ export const SEED_REP_TARGETS = [
   { id: 'rt-11111111-1111-1111-1111-aaaa0000001b-11', rep_id: '11111111-1111-1111-1111-aaaa0000001b', fiscal_year: 2026, month: 11, target_revenue: 183857.7 },
   { id: 'rt-11111111-1111-1111-1111-aaaa0000001b-12', rep_id: '11111111-1111-1111-1111-aaaa0000001b', fiscal_year: 2026, month: 12, target_revenue: 185396.25 },
 ]
+
+// =============================================================================
+// Sales Directors — added in Phase D (promo calendar)
+// Nick: Conventional + Inbound director
+// JR: eCommerce director (also a manager)
+// (Evan is already in SEED_PROFILES as a rep; he's also the director of New Distribution + Wholesale + Chains.
+// We override his role to 'director' below.)
+// =============================================================================
+
+export const SEED_DIRECTORS = [
+  {
+    id: '11111111-1111-1111-1111-aaaa00000020',
+    email: 'nick@mitra-9.com',
+    full_name: 'Nick Kemper',
+    role: 'director',
+    sales_channel: 'Conventional',  // primary; also covers Inbound (see promo permissions)
+    sales_region: null,
+  },
+]
+
+// Channel ownership map for promo permissions
+export const DIRECTOR_CHANNEL_OWNERSHIP = {
+  'Nick Kemper':       ['Conventional', 'Inbound'],
+  'Evan Beard':        ['New Distribution', 'Wholesale', 'Chains'],
+  'JR Hernandez':      ['eCommerce', 'Retail Direct'],
+}

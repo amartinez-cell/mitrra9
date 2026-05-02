@@ -1,7 +1,7 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, LineChart, AlertTriangle, Lightbulb, CalendarDays,
-  Calculator, Building2, LogOut, Bell, ChevronDown, Target,
+  Calculator, Building2, LogOut, Bell, ChevronDown, Target, Package, DollarSign,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useState } from 'react'
@@ -9,14 +9,16 @@ import { classNames } from '../../lib/format'
 import { isSupabaseConfigured } from '../../lib/supabase'
 
 const NAV = [
-  { to: '/',              label: 'Dashboard',         icon: LayoutDashboard, roles: ['manager', 'rep', 'viewer'] },
-  { to: '/plan',          label: 'Plan & Forecast',   icon: LineChart,       roles: ['manager', 'rep', 'viewer'] },
-  { to: '/risks',         label: 'Risks & Opps',      icon: AlertTriangle,   roles: ['manager', 'rep', 'viewer'] },
-  { to: '/initiatives',   label: 'Initiatives',       icon: Lightbulb,       roles: ['manager', 'rep', 'viewer'] },
-  { to: '/promos',        label: 'Promo Calendar',    icon: CalendarDays,    roles: ['manager', 'rep', 'viewer'] },
-  { to: '/miss',          label: 'Miss Calculator',   icon: Calculator,      roles: ['manager', 'viewer'] },
-  { to: '/distributors',  label: 'Distributors',      icon: Building2,       roles: ['manager', 'rep', 'viewer'] },
-  { to: '/targets',       label: 'Target Setting',    icon: Target,          roles: ['manager'] },
+  { to: '/',              label: 'Dashboard',         icon: LayoutDashboard, roles: ['manager', 'director', 'rep', 'viewer'] },
+  { to: '/plan',          label: 'Plan & Forecast',   icon: LineChart,       roles: ['manager', 'director', 'rep', 'viewer'] },
+  { to: '/risks',         label: 'Risks & Opps',      icon: AlertTriangle,   roles: ['manager', 'director', 'rep', 'viewer'] },
+  { to: '/initiatives',   label: 'Initiatives',       icon: Lightbulb,       roles: ['manager', 'director', 'rep', 'viewer'] },
+  { to: '/promos',        label: 'Promo Calendar',    icon: CalendarDays,    roles: ['manager', 'director', 'rep', 'viewer'] },
+  { to: '/miss',          label: 'Miss Calculator',   icon: Calculator,      roles: ['manager', 'director', 'viewer'] },
+  { to: '/distributors',  label: 'Distributors',      icon: Building2,       roles: ['manager', 'director', 'rep', 'viewer'] },
+  { to: '/targets',       label: 'Target Setting',    icon: Target,          roles: ['manager', 'director'] },
+  { to: '/pos-materials', label: 'POS Materials',     icon: Package,         roles: ['manager', 'director'] },
+  { to: '/pricing',       label: 'Pricing & COGS',    icon: DollarSign,      roles: ['manager', 'director'] },
 ]
 
 export default function Shell({ children }) {
@@ -158,6 +160,8 @@ function pageTitle(path) {
     '/miss': 'Revenue Miss Calculator',
     '/distributors': 'Distributor Scorecard',
     '/targets': 'Target Setting',
+    '/pos-materials': 'POS Materials',
+    '/pricing': 'Pricing & COGS',
   }
   return map[path] || 'Mitra-9'
 }
@@ -172,6 +176,8 @@ function pageSubtitle(path) {
     '/miss': 'True-cost modeling for delayed and unshipped orders',
     '/distributors': 'Partner-level performance vs target',
     '/targets': 'Set distributor and rep revenue plans for the fiscal year',
+    '/pos-materials': 'Manage POS items used as trade-spend line items on promos',
+    '/pricing': 'Edit COGS values used for gross profit and contribution profit calcs',
   }
   return map[path] || ''
 }

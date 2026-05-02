@@ -6,7 +6,9 @@ import DashboardPage from './pages/DashboardPage'
 import PlanForecastPage from './pages/PlanForecastPage'
 import RiskOppsPage from './pages/RiskOppsPage'
 import InitiativesPage from './pages/InitiativesPage'
-import PromosPage from './pages/PromosPage'
+import PromosPage from './pages/promos/PromoCalendarPage'
+import PosMaterialsPage from './pages/pos-materials/PosMaterialsPage'
+import PricingAdminPage from './pages/admin/PricingAdminPage'
 import MissCalculatorPage from './pages/MissCalculatorPage'
 import DistributorsPage from './pages/DistributorsPage'
 import TargetsPage from './pages/targets/TargetsPage'
@@ -55,8 +57,28 @@ export default function App() {
           path="/targets"
           element={
             <RequireAuth>
-              <RequireRole roles={['manager']}>
+              <RequireRole roles={['manager', 'director']}>
                 <TargetsPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/pos-materials"
+          element={
+            <RequireAuth>
+              <RequireRole roles={['manager', 'director']}>
+                <PosMaterialsPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/pricing"
+          element={
+            <RequireAuth>
+              <RequireRole roles={['manager', 'director']}>
+                <PricingAdminPage />
               </RequireRole>
             </RequireAuth>
           }
